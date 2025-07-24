@@ -9,16 +9,14 @@ class OrdersResource
 {
     private Order $order;
     private string $version;
+    public static array $allowedVersions = ['v1', 'v2'];
+
     public function __construct($version, Order $order)
     {
-        $allowedVersions = ['v1', 'v2'];
-        if (!in_array($version, $allowedVersions, true)) {
-            throw new \InvalidArgumentException("Invalid version: {$version}");
-        }
-
-        $this->version = $version;
+        $this->setVersion($version);
         $this->order = $order;
     }
+
     /**
      * Converts the resource to an array based on version
      *
@@ -65,7 +63,7 @@ class OrdersResource
      *
      * @return string
      */
-    public function toJson() : string
+    public function toJson(): string
     {
         return json_encode($this->toArray());
     }
@@ -76,7 +74,7 @@ class OrdersResource
      * @return JsonResponse
      * @throws \Exception
      */
-    public function response() : JsonResponse
+    public function response(): JsonResponse
     {
         switch ($this->version) {
             case 'v1':
@@ -88,13 +86,12 @@ class OrdersResource
         }
     }
 
-        // TODO how to set version create and then set separately or all together
-//    public function setVersion(string $version): void
-//    {
-//        $allowedVersions = ['v1', 'v2'];
-//        if (!in_array($version, $allowedVersions, true)) {
-//            throw new \InvalidArgumentException("Invalid version: {$version}");
-//        }
-//        $this->version = $version;
-//    }
+    // dont like copy paste but gonna elave this as is
+    private function setVersion(string $version): void
+    {
+        if (!in_array($version, self::$allowedVersions, true)) {
+            throw new \InvalidArgumentException("Invalid version: {$version}");
+        }
+        $this->version = $version;
+    }
 }

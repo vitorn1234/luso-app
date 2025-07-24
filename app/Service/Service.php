@@ -8,16 +8,23 @@ use App\Domain\TaxId;
 use App\Domain\Item;
 use App\Domain\User;
 use App\Helper\AppHelper;
+use App\Http\Resources\OrdersResource;
+use Illuminate\Support\Facades\Http;
 
 class Service
 {
     private array $validatedData;
     private string $version;
-    private string $order;
+    public static array $allowedVersions = ['v1', 'v2'];
+    private Order $order;
+    public bool $sent = false;
+    private array $processedData;
 
     public function __construct(string $version, array $validatedBodyData)
     {
-        $this->version = $version;
+        // improve create base class and extend it to both service and ordersResouce
+        // with $version and order and
+        $this->setVersion($version);
         $this->validatedData = $validatedBodyData;
     }
 
@@ -33,7 +40,7 @@ class Service
             // Create the Order
             switch ($this->version) {
                 case 'v1':
-                    // Doubt about taxId
+                    // could switch this into it's own method
                     $taxId = new TaxId($this->validatedData['customer_nif']);
                     $user= new User($this->validatedData['customer_name'],$taxId);
                     $money = new Money($this->validatedData['total'],$this->validatedData['currency']);
@@ -43,7 +50,7 @@ class Service
                     $order = new Order($user, $money, $items);
                     break;
                 case 'v2':
-
+                    // could switch this into its own method
                     $attr= $this->validatedData['data']['attributes'];
                     $taxId = new TaxId($attr['customer']['nif']);
                     $user= new User($attr['customer']['name'],$taxId);
@@ -54,6 +61,7 @@ class Service
                     $order = new Order($user, $money, $items);
                     break;
                 default:
+                    throw new \Exception('Version not valid');
 
             }
         } catch (\Exception $e) {
@@ -64,6 +72,32 @@ class Service
         $this->order= $order;
 
         return $this;
-        //return $order;
+    }
+
+    public function getOrder() : Order{
+        return $this->order;
+    }
+
+    function sendExternalService($url = "Dev.micros.services"): self
+    {
+        try {
+            $this->processedData = (new OrdersResource($this->version,$this->getOrder()))->toArray();
+        }catch (\Exception $e){
+
+        }
+        $response = Http::post($url, $this->processedData);
+
+        // Check if the request was successful (status code 2xx)
+        $this->sent = $response->successful();
+        return $this;
+    }
+
+    private function setVersion(string $version): self
+    {
+        if (!in_array($version, self::$allowedVersions, true)) {
+            throw new \InvalidArgumentException("Invalid version: {$version}");
+        }
+        $this->version = $version;
+        return $this;
     }
 }

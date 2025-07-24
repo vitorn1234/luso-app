@@ -40,36 +40,38 @@ class OrderController extends Controller
 //        $lastNumber = $lastOrder ? intval(substr($lastOrder->number, 9)) : 0;
 //        $lastNumber = $lastOrder ? intval($lastOrder->id) : 0;
 //        $newNumber = $lastNumber + 1;
-        $lastNumber = random_int(0,99998);
-        $newNumber = $lastNumber + 1;
-        $orderNumber = 'ORD-' . date('Y') . '-' . str_pad($newNumber, 5, '0');
+//        $lastNumber = random_int(0,99998);
+//        $newNumber = $lastNumber + 1;
+        $orderNumber = 'ORD-' . date('Y') . '-' . str_pad(random_int(1,99999), 5, '0');
 
-        DB::beginTransaction();
+        // DB::beginTransaction();
 
         try {
             // Create the Order
-            $order = Order::create([
-                'customer_name' => $validatedData['customer_name'],
-                'customer_nif' => $validatedData['customer_nif'],
-                'total' => $validatedData['total'],
-                'currency' => $validatedData['currency'],
-                'number' => $orderNumber,
-                'uuid' => $uuid,
-                // Add other fields if needed
-            ]);
+            $order = new Order();
+            $order->customer_name = $validatedData['customer_name'];
+            $order->customer_nif = $validatedData['customer_nif'];
+            $order->total = $validatedData['total'];
+            $order->currency = $validatedData['currency'];
+            $order->number = $orderNumber;
+            $order->uuid = $uuid;
+            $order->created_at = now();
+            // Assign other fields if needed
+
+            //$order->save(); // Save the model to the database
             $total = 0;
             // Create Order Items
             foreach ($validatedData['items'] as $itemData) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'sku' => $itemData['sku'],
-                    'qty' => $itemData['qty'],
-                    'unit_price' => $itemData['unit_price'],
-                ]);
-                $total += intval(['qty']) * intval($itemData['unit_price']);
+                $orderItem = new OrderItem();
+                $orderItem->order_id = $order->id;
+                $orderItem->sku = $itemData['sku'];
+                $orderItem->qty = $itemData['qty'];
+                $orderItem->unit_price = $itemData['unit_price'];
+                //$orderItem->save();
+                $total += ((int)$itemData['qty'] * (int)$itemData['unit_price']);
             }
 
-            if ($total !=  intval($validatedData['total'])){
+            if ((int)$total !=  intval($validatedData['total'])){
                 return response()->json(['error' => "Failed processing body",
                     'message' => "Total $validatedData[total] defined does not match the sum of the ordered items $total"], 400);
             }

@@ -6,7 +6,7 @@ class Item
 {
     private string $sku;
     private int $qty;        // Quantity as integer
-    private float $price;    // Price as float
+    private string $price;    // Price as string/float
 
     /**
      * Item constructor.
@@ -15,21 +15,21 @@ class Item
      * @param float|string $price
      * @throws \InvalidArgumentException
      */
-    public function __construct(string $sku, $qty, $price)
+    public function __construct(string $sku, int $qty, string $price)
     {
         $this->sku = $sku;
 
-        // Validate and cast quantity
-        if (is_string($qty) && !ctype_digit($qty)) {
-            throw new \InvalidArgumentException('Quantity must be a non-negative integer.');
+        // Validate quantity: must be non-negative
+        if ($qty < 0) {
+            throw new \InvalidArgumentException('Quantity must be a positive value.');
         }
-        $this->qty = (int) $qty;
+        $this->qty = $qty;
 
-        // Validate and cast price
-        if (is_string($price) && !is_numeric($price)) {
-            throw new \InvalidArgumentException('Price must be a numeric value.');
+        // Validate price: must be numeric
+        if (!is_numeric($price)) {
+            throw new \InvalidArgumentException('Price must be in a numeric format.');
         }
-        $this->price = (float) $price;
+        $this->price = $price;
     }
 
     public function getSku(): string

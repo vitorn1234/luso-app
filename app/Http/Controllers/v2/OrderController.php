@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v2;
 
 use App\Http\Controllers\Controller;
+use DateTimeInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Order;
@@ -12,7 +13,7 @@ use App\Rules\ValidNIF;
 
 class OrderController extends Controller
 {
-    public function store(Request $request): \Illuminate\Http\JsonResponse
+    public function create(Request $request): \Illuminate\Http\JsonResponse
     {
         // Validate the incoming request
         try {
@@ -30,10 +31,11 @@ class OrderController extends Controller
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
+
                 $errors = [];
-                foreach ($e->errors()->messages() as $field => $messages) {
+                foreach ($e->errors() as $field => $messages) {
                     foreach ($messages as $message) {
-                        $pointer = $this->convertToPointer($field);
+                        $pointer = '/' . str_replace('.', '/', $field);
                         $errors[] = [
                             'status' => '422',
                             'source' => [ 'pointer' => $pointer ],
@@ -52,7 +54,7 @@ class OrderController extends Controller
         $uuid = Str::uuid()->toString();
 
         // Current timestamp in ISO 8601
-        $createdAt = now()->toIso8601String();
+        $createdAt = now()->setTimezone('UTC')->format('Y-m-d\TH:i:s\Z');
 
         // Build JSON:API response
         $response = [
@@ -67,7 +69,7 @@ class OrderController extends Controller
                     'status' => 'created',
                     'currency' => $request->input('data.attributes.summary.currency'),
                     'total' => $request->input('data.attributes.summary.total'),
-                    'created_at' => $createdAt,
+                    'created_at' => $createdAt
                 ],
             ],
         ];

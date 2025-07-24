@@ -4,7 +4,7 @@ use App\Http\Controllers\v1\OrderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->group(function () {
+Route::prefix('test/v1/')->group(function () {
 
     Route::post('/order', [OrderController::class, 'create']);
 

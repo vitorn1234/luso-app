@@ -82,17 +82,19 @@ it('fails order creation v1 with invalid request body', function () {
         "error" => "Failed processing body",
         "message" => "The total field is required. (and 1 more error)"
     ]);
-
+});
+it('fails order creation v1 with invalid total', function () {
     // Total mismatch
     $this->jsonData['total'] = "145.00";
     $response = $this->post('/api/v1/order', $this->jsonData);
     $response->assertStatus(422);
     $response->assertJson([
         "error" => "Failed processing body",
-        'message' => 'Total 145 defined does not match the sum of the ordered items 115',
+        'message' => 'Total 145.00 defined does not match the sum of the ordered items 115',
     ]);
     $this->jsonData['total'] = "115.00";
-
+});
+it('fails order creation v1 with invalid currency', function () {
     // Invalid currency
     $this->jsonData['currency'] = "USD";
     $response = $this->post('/api/v1/order', $this->jsonData);
@@ -102,7 +104,8 @@ it('fails order creation v1 with invalid request body', function () {
         'message' => 'The selected currency is invalid.',
     ]);
     $this->jsonData['currency'] = "EUR";
-
+});
+it('fails order creation v1 v2 with no items', function () {
     // Empty items array
     $this->jsonData['items'] = [];
     $response = $this->post('/api/v1/order', $this->jsonData);
@@ -121,14 +124,14 @@ it('creates an order v2 successfully', function () {
             "self"
         ],
         "data" => [
-            "type" ,
-            "id" ,
+            "type",
+            "id",
             "attributes" => [
-                "uuid" ,
-                "status" ,
-                "currency" ,
-                "total" ,
-                "created_at" ,
+                "uuid",
+                "status",
+                "currency",
+                "total",
+                "created_at",
             ]
         ]
     ]);
@@ -220,7 +223,7 @@ it('fails order creation v2 with invalid total', function () {
                     "pointer" => "/data/attributes/summary/total"
                 ],
                 "title" => "Invalid Attribute",
-                "detail" => "Total 145 defined does not match the sum of the ordered items 115"
+                "detail" => "Total 145.00 defined does not match the sum of the ordered items 115"
             ]
         ]
     ]);

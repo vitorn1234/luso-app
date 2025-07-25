@@ -82,18 +82,44 @@ Since I wasn't sure what was expected, I initially followed a standard approach.
   * Validating calculations (left validating total calculations inside the object creation)
   * Validating NIF
 Missing weird cases
-
-
+  * 
+in case it does not compute/show ./vendor/bin/pest tests/Feature/OrderTestPest.php comand line inside project
+```
+   PASS  Tests\Feature\OrderTestPest
+  ✓ it returns a successful response for the home route                                                                                                                                                                                                                0.21s  
+  ✓ it creates an order v1 successfully                                                                                                                                                                                                                                0.91s  
+  ✓ it fails order creation v1 with invalid request body                                                                                                                                                                                                               0.02s  
+  ✓ it fails order creation v1 with invalid total                                                                                                                                                                                                                      0.01s  
+  ✓ it fails order creation v1 with invalid currency                                                                                                                                                                                                                   0.02s  
+  ✓ it fails order creation v1 v2 with no items                                                                                                                                                                                                                        0.02s  
+  ✓ it creates an order v2 successfully                                                                                                                                                                                                                                0.76s  
+  ✓ it fails order creation v2 with invalid request body                                                                                                                                                                                                               0.02s  
+  ✓ it fails order creation v2 with invalid total                                                                                                                                                                                                                      0.02s  
+  ✓ it fails order creation v2 with invalid currency                                                                                                                                                                                                                   0.02s  
+  ✓ it fails order creation v2 with no items   
+```
 ### Unit Testing
 * total calculations - TotalCalculationTest.php
   * create Order with correct values and total
   * create Order with one missing item
-* request construction - RequestTest.php
+  * 
+* request construction - RequestTest.php, the feature testing does all the heavy lifting here
   * v1 - ask for a v1 response baseed on an Order object
   * v2 - ask for a v2 response baseed on an Order object
 * response parsing -  ResponseParsingTest.php
   * v1 response parsing test
   * v2 response parsing test
+    PASS  Tests\Unit\RequestTest
+    ✓ it asserts that true is true                                                                                                                                                                                                                                       0.01s
+
+```  PASS  Tests\Unit\ResponseParsingTest
+  ✓ it v1 response parsing test with (App\Domain\Order, [['573bbffe-154f-473a-9ac0-3539a93158aa', 'ORD-2025-53026', 'created', …]])                                                                                                                                    0.01s  
+  ✓ it v2 response parsing test with (App\Domain\Order, [['https://micros.services/api/v…-53026'], ['orders', 'ORD-2025-53026', ['573bbffe-154f-473a-9ac0-3539a93158aa', 'created', 'EUR', …]]])
+
+  WARN  Tests\Unit\TotalCalculationTest
+  ! it creates an order successfully with valid value with (App\Domain\User, App\Domain\Money, [App\Domain\Item, App\Domain\Item]) → This test is not expected to perform assertions but performed 1 assertion                                                         0.01s  
+  ✓ it fails to create an order with incorrect total value with (App\Domain\User, App\Domain\Money, [App\Domain\Item])
+```
 ## Non-Functional Requirements
 FOR psr-12 I installed composer require --dev squizlabs/php_codesniffer for validating
 vendor/bin/phpcs --standard=PSR12 app/Http/Controllers
@@ -111,3 +137,6 @@ And any other test cases I didn't test
 
 Could have create a function to do the calculations instead of doing it automatically
 like ->calculateTotal or ->validateTotal()... options.... making it easier to test calculation
+
+There are 3 OrderController the correct one is the one inside Controller root, the other 2 was a test
+without reading the doc :D

@@ -66,6 +66,6 @@ it('fails to create an order with incorrect total value', function ($user, $mone
     [
         $user, // your user object
         $money, // your money object
-        $item // your array of item objects
+        $item // your array of item Object - only one item object in array
     ],
 ]);

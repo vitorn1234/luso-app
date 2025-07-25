@@ -113,4 +113,5 @@ class Service
     public function getProcessData(): array {
         return $this->processedData;
     }
+
 }

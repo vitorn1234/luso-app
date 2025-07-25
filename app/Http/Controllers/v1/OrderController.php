@@ -18,7 +18,7 @@ class OrderController extends Controller
         try {
             $validatedData = $request->validate([
                 'customer_name' => 'required|string',
-                'customer_nif' => ['required','string', new ValidNIF],
+                'customer_nif' => ['required', 'string', (new ValidNIF())],
                 'total' => 'required|numeric',
                 'currency' => 'required|string|in:EUR', //try with USD
                 'items' => 'required|array|min:1',
@@ -32,7 +32,7 @@ class OrderController extends Controller
         }
 
         // Generate UUID for the order
-        $uuid = (string) Str::uuid();
+        $uuid = (string)Str::uuid();
 
         // create "ORD-2025-00001"
         // TODO figure out how to get the last part of the ORD
@@ -42,7 +42,7 @@ class OrderController extends Controller
 //        $newNumber = $lastNumber + 1;
 //        $lastNumber = random_int(0,99998);
 //        $newNumber = $lastNumber + 1;
-        $orderNumber = 'ORD-' . date('Y') . '-' . str_pad(random_int(1,99999), 5, '0');
+        $orderNumber = 'ORD-' . date('Y') . '-' . str_pad(random_int(1, 99999), 5, '0');
 
         // DB::beginTransaction();
 
@@ -71,12 +71,16 @@ class OrderController extends Controller
                 $total += ((int)$itemData['qty'] * (int)$itemData['unit_price']);
             }
 
-            if ((int)$total !=  intval($validatedData['total'])){
-                return response()->json(['error' => "Failed processing body",
-                    'message' => "Total $validatedData[total] defined does not match the sum of the ordered items $total"], 400);
+            if ((int)$total != intval($validatedData['total'])) {
+                return response()->json(
+                    ['error' => "Failed processing body",
+                    'message' =>
+                        "Total $validatedData[total] defined does not match the sum of the ordered items $total"],
+                    400
+                );
             }
-            // DB::commit();
 
+            // DB::commit();
         } catch (\Exception $e) {
             // DB::rollBack();
             return response()->json(['error' => 'Failed to create order', 'message' => $e->getMessage()], 500);
@@ -94,7 +98,7 @@ class OrderController extends Controller
             ],
         ];
 
-        return response()->json($responseData, 201); // 201 - Resource created successfully
-
+        // 201 - Resource created successfully
+        return response()->json($responseData, 201);
     }
 }

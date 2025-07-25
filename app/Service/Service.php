@@ -10,6 +10,7 @@ use App\Domain\User;
 use App\Helper\AppHelper;
 use App\Http\Resources\OrdersResource;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class Service
 {
@@ -82,13 +83,16 @@ class Service
     {
         try {
             $this->processedData = (new OrdersResource($this->version,$this->getOrder()))->toArray();
+
+            $response = Http::post($url, $this->processedData);
+            // Check if the request was successful (status code 2xx)
+            $this->sent = $response->successful();
         }catch (\Exception $e){
-
+            //throw new \Exception("Error when trying to send to external Service". $e->getMessage());
+            Log::error("Error when trying to send to external Service: ". $e->getMessage());
+            // the external service is something
         }
-        $response = Http::post($url, $this->processedData);
 
-        // Check if the request was successful (status code 2xx)
-        $this->sent = $response->successful();
         return $this;
     }
 

@@ -25,15 +25,40 @@ Besides this structure I did a Model for the DB, a simple one but after reading 
 asked but I left it.
 
 ### Application Layer
+Get input and version, validates and return the data in a readable format
+`$validatedData = $request->validate(AppHelper::getValidatorVersion($apiVersion));`
+
+Save the data into the service object.
+`$service = new Service($apiVersion,$validatedData);`
+
+Process the data based on the version into the lets call it DTO Order Object. Using the processOrder() which adds the fields missing
+`$service = $service->processOrder()`
+
+then we can send to an external service using POST currently (it will fail cause the url was not define 
+and it uses the default),
+`->sendExternalService();`
+
+also we can change the version to another we can receive v1 and send it like v2
+`->setVersion('v2');`
+
+if the service sent data to the external service, `$service->sent ` will be true 
+
+Then we have a Resource which basicly transforms the data to what we expect to be the response, we have toArray and response to be json
+`(new OrdersResource($apiVersion,$service->getOrder()))->response();`
+
+Could have organized better the locations of certain part of the code like using the Order class to group everything related to Order data processing/validated and responding as static or in other ways
+
+But have a AppHelper for Error responses, could have changed it to ErrorHAndler, 
+have OrderResource to have all processing of the response with uses the Order object.
 
 ## Input structure
-
+Using validator to define/validate the input data and the initial structure to pass to the Order object
 For this i decided to follow the validator already proven return structure after validating properly,so we have 2
-validator structure that share the validations but create diferent Objects that we process and transfer to the Order
+validator structure that share the validations but create different Objects that we process and transfer to the Order
 DTO.
 
 ## Output structure
-
+Mainly in OrderResource
 Since we are not using DB I simply created a class that receives the Domain object(DTO?) and processes it into the
 response type we require,
 may it be v1 or v2 with each particular specifications
@@ -62,3 +87,5 @@ vendor/bin/phpcs --standard=PSR12 app/Http/Controllers
 "lint": "phpcs --standard=PSR12 app/",
 "fix": "phpcbf --standard=PSR12 app/"
 } to composer
+
+

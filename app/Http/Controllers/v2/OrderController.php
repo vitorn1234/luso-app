@@ -21,7 +21,7 @@ class OrderController extends Controller
             $validatedData = $request->validate([
                 'data.type' => 'required|string|in:orders',
                 'data.attributes.customer.name' => 'required|string',
-                'data.attributes.customer.nif' => ['required','string', new ValidNIF],
+                'data.attributes.customer.nif' => ['required', 'string', (new ValidNIF())],
                 'data.attributes.summary.currency' => 'required|string|in:EUR', //try with USD
                 'data.attributes.summary.total' => 'required|string',
                 'data.attributes.lines' => 'required|array',
@@ -29,22 +29,20 @@ class OrderController extends Controller
                 'data.attributes.lines.*.qty' => 'required|integer',
                 'data.attributes.lines.*.price' => 'required|string',
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
-
-                $errors = [];
-                foreach ($e->errors() as $field => $messages) {
-                    foreach ($messages as $message) {
-                        $pointer = '/' . str_replace('.', '/', $field);
-                        $errors[] = [
-                            'status' => '422',
-                            'source' => [ 'pointer' => $pointer ],
-                            'title' => 'Invalid Attribute',
-                            'detail' => $message
-                        ];
-                    }
+            $errors = [];
+            foreach ($e->errors() as $field => $messages) {
+                foreach ($messages as $message) {
+                    $pointer = '/' . str_replace('.', '/', $field);
+                    $errors[] = [
+                        'status' => '422',
+                        'source' => ['pointer' => $pointer],
+                        'title' => 'Invalid Attribute',
+                        'detail' => $message
+                    ];
                 }
-                return response()->json(['errors' => $errors], 422, ['Content-Type' => 'application/vnd.api+json']);
+            }
+            return response()->json(['errors' => $errors], 422, ['Content-Type' => 'application/vnd.api+json']);
         }
 
         // Generate order ID
@@ -77,6 +75,4 @@ class OrderController extends Controller
         // Return response with 201 Created
         return response()->json($response, 201, ['Content-Type' => 'application/vnd.api+json']);
     }
-
-
 }

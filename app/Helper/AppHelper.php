@@ -14,7 +14,7 @@ class AppHelper
         return match ($version) {
             'v1' => [
                 'customer_name' => 'required|string',
-                'customer_nif' => ['required', 'string', new ValidNIF],
+                'customer_nif' => ['required', 'string', new ValidNIF()],
                 'total' => 'required|numeric',
                 'currency' => 'required|string|in:EUR', //try with USD
                 'items' => 'required|array|min:1',
@@ -25,7 +25,7 @@ class AppHelper
             'v2' => [
                 'data.type' => 'required|string|in:orders',
                 'data.attributes.customer.name' => 'required|string',
-                'data.attributes.customer.nif' => ['required','string', new ValidNIF],
+                'data.attributes.customer.nif' => ['required','string', new ValidNIF()],
                 'data.attributes.summary.currency' => 'required|string|in:EUR', //try with USD
                 'data.attributes.summary.total' => 'required|string',
                 'data.attributes.lines' => 'required|array',
@@ -35,15 +35,14 @@ class AppHelper
             ],
             default => throw new \Exception('Invalid version format')
         };
-
     }
 
-    public static function getResponseError($version,$e, $status = 400): JsonResponse
+    public static function getResponseError($version, $e, $status = 400): JsonResponse
     {
         self::validateVersion($version);
         return match ($version) {
-            'v1' => self::respondErrorV1($e,$status),
-            'v2' =>  self::respondErrorV2($e,$status),
+            'v1' => self::respondErrorV1($e, $status),
+            'v2' =>  self::respondErrorV2($e, $status),
             default => throw new \InvalidArgumentException("Invalid version: {$version}")
         };
     }
@@ -67,26 +66,23 @@ class AppHelper
 
             return response()->json(['errors' => $errors], "422", ['Content-Type' => 'application/vnd.api+json']);
         } else {
-            // TODO work with all sort of errors return and return match (get_class($e)) {
-            ////        'Illuminate\Validation\ValidationException' =>
-            ////        default => ,
-            ////    };
+            // TODO work with all sort of errors return and return match get_class($e) or define our own
             $errorResponse = [
                 'errors' => [
                     [
                         'status' => $status,
                         'title' => 'Internal Server Error',
                         'detail' => $e->getMessage(),
-                        'code' => $e->getCode()  ?? 'internal_server_error' // TODO fix issues with code
+                        'code' => 'internal_server_error' // TODO fix issues with code definition and values
                     ]
                 ]
             ];
 
-            return response()->json($errorResponse, $status, ['Content-Type' => 'application/vnd.api+json']);
+            return response()->json($errorResponse, $status, ['Content-Type' => 'application/json']);
         }
     }
 
-    private static function respondErrorV1($e, int $status) : JsonResponse
+    private static function respondErrorV1($e, int $status): JsonResponse
     {
         $message = $e->getMessage();
         return response()->json([
@@ -95,7 +91,7 @@ class AppHelper
         ], $status);
     }
 
-    public static function validateVersion($version) : void
+    public static function validateVersion($version): void
     {
         $allowedVersions = ['v1', 'v2'];
         if (!in_array($version, $allowedVersions, true)) {

@@ -78,7 +78,7 @@ class OrdersResource
     {
         switch ($this->version) {
             case 'v1':
-                return response()->json($this->toArray());
+                return response()->json($this->toArray(), 200, ['Content-Type' => 'application/json']);
             case 'v2':
                 return response()->json($this->toArray(), 200, ['Content-Type' => 'application/vnd.api+json']);
             default:

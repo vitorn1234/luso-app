@@ -18,15 +18,14 @@ class OrderController extends Controller
         try {
             $validatedData = $request->validate(AppHelper::getValidatorVersion($apiVersion));
 
-            $service = new Service($apiVersion,$validatedData);
-
+            $service = new Service($apiVersion, $validatedData);
             $service = $service->processOrder()->sendExternalService();  //we can define the service
-
-            If($service->sent == false){
-                Log::error($service->getError());
+            if (!$service->sent) {
+                Log::error("Failed to send to External Service");
             }
 
-            return (new OrdersResource($apiVersion,$service->getOrder()))->response();
+            // return response with correct headers
+            return (new OrdersResource($apiVersion, $service->getOrder()))->response();
         } catch (\Exception $e) {
             return AppHelper::getResponseError($apiVersion, $e);
         }

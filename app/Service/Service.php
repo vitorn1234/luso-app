@@ -34,62 +34,62 @@ class Service
         return $this->validatedData;
     }
 
-    public function processOrder() : self
+    public function processOrder(): self
     {
-        $items =[];
+        $items = [];
         try {
             // Create the Order
             switch ($this->version) {
                 case 'v1':
                     // could switch this into it's own method
                     $taxId = new TaxId($this->validatedData['customer_nif']);
-                    $user= new User($this->validatedData['customer_name'],$taxId);
-                    $money = new Money($this->validatedData['total'],$this->validatedData['currency']);
+                    $user = new User($this->validatedData['customer_name'], $taxId);
+                    $money = new Money($this->validatedData['total'], $this->validatedData['currency']);
                     foreach ($this->validatedData['items'] as $itemData) {
-                        $items[] = new Item($itemData['sku'],$itemData['qty'],$itemData['unit_price']);
+                        $items[] = new Item($itemData['sku'], $itemData['qty'], $itemData['unit_price']);
                     }
                     $order = new Order($user, $money, $items);
                     break;
                 case 'v2':
                     // could switch this into its own method
-                    $attr= $this->validatedData['data']['attributes'];
+                    $attr = $this->validatedData['data']['attributes'];
                     $taxId = new TaxId($attr['customer']['nif']);
-                    $user= new User($attr['customer']['name'],$taxId);
-                    $money = new Money($attr['summary']['total'],$attr['summary']['currency']);
+                    $user = new User($attr['customer']['name'], $taxId);
+                    $money = new Money($attr['summary']['total'], $attr['summary']['currency']);
                     foreach ($attr['lines'] as $itemData) {
-                        $items[] = new Item($itemData['sku'],$itemData['qty'],$itemData['price']);
+                        $items[] = new Item($itemData['sku'], $itemData['qty'], $itemData['price']);
                     }
                     $order = new Order($user, $money, $items);
                     break;
                 default:
                     throw new \Exception('Version not valid');
-
             }
         } catch (\Exception $e) {
             //see if we need to process anything here or create our own exceptions
             throw $e;
         }
 
-        $this->order= $order;
+        $this->order = $order;
 
         return $this;
     }
 
-    public function getOrder() : Order{
+    public function getOrder(): Order
+    {
         return $this->order;
     }
 
-    function sendExternalService($url = "Dev.micros.services"): self
+    public function sendExternalService($url = "Dev.micros.services"): self
     {
         try {
-            $this->processedData = (new OrdersResource($this->version,$this->getOrder()))->toArray();
+            $this->processedData = (new OrdersResource($this->version, $this->getOrder()))->toArray();
 
             $response = Http::post($url, $this->processedData);
             // Check if the request was successful (status code 2xx)
             $this->sent = $response->successful();
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             //throw new \Exception("Error when trying to send to external Service". $e->getMessage());
-            Log::error("Error when trying to send to external Service: ". $e->getMessage());
+            Log::error("Error when trying to send to external Service: " . $e->getMessage());
             // the external service is something
         }
 

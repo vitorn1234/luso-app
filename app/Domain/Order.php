@@ -59,7 +59,8 @@ class Order
         $totalMain = $this->money->amount();
         if ((int)$totalMain != (int)$total) {
             throw new \InvalidArgumentException(
-                "Total $totalMain defined does not match the sum of the ordered items $total");
+                "Total $totalMain defined does not match the sum of the ordered items $total"
+            );
         }
     }
     // Getter for user

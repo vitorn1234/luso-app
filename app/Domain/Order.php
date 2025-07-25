@@ -4,7 +4,7 @@ namespace App\Domain;
 
 use App\Domain\Item;
 use Illuminate\Support\Str;
-use phpDocumentor\Reflection\Types\Self_;
+use App\Exceptions\LogicValidationException;
 
 class Order
 {
@@ -40,27 +40,29 @@ class Order
 
         // Process order number
         $this->number  = 'ORD-' . date('Y') . '-' . str_pad(random_int(1, 99999), 5, '0');
-        $this->createdAt = (new \DateTimeImmutable())->format(\DateTime::ATOM);
+        $this->createdAt = now()->setTimezone('UTC')->format('Y-m-d\TH:i:s\Z');
     }
 
     protected function validateItems($items): void
     {
+//                0 => "The data.type field is required."
         if (count($items) <= 0) {
-            throw new \InvalidArgumentException('At least one item must be provided.');
+            $message = 'At least one item must be provided.';
+            throw new LogicValidationException($message,["data.attributes.lines"=>[$message]]);
         }
         $total = 0;
         foreach ($items as $item) {
             if (!($item instanceof Item)) {
-                throw new \InvalidArgumentException('All items must be instances of Item');
+                $message = 'All items must be instances of Item';
+                throw new LogicValidationException($message,['data.attributes.lines' => [$message]]);
             }
             $total += (int)$item->getQty() * (int)$item->getPrice();
         }
 
         $totalMain = $this->money->amount();
         if ((int)$totalMain != (int)$total) {
-            throw new \InvalidArgumentException(
-                "Total $totalMain defined does not match the sum of the ordered items $total"
-            );
+            $message = "Total $totalMain defined does not match the sum of the ordered items $total";
+            throw new LogicValidationException( $message,['data.attributes.summary.total'=>[$message]]);
         }
     }
     // Getter for user

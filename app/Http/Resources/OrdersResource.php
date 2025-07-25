@@ -31,10 +31,9 @@ class OrdersResource
                     'uuid' => $this->order->getUuid(),
                     'number' => $this->order->getNumber(),
                     'status' => 'created', // Consider using $this->order->getStatus() if available
-                    'total' => $this->order->getMoney()->amount(),
+                    'total' => sprintf("%.2f", $this->order->getMoney()->amount()),
                     'currency' => $this->order->getMoney()->currency(),
-                    'created_at' => now()->toIso8601String(),  // Replace when the datetime should be created
-                    //$this->order->getCreatedAt()?->toIso8601String()
+                    'created_at' => now()->setTimezone('UTC')->format('Y-m-d\TH:i:s\Z'),
                 ],
             ],
             'v2' => [
@@ -47,10 +46,9 @@ class OrdersResource
                     'attributes' => [
                         'uuid' => $this->order->getUuid(),
                         'status' => 'created', // Replace with actual status if available
-                        'total' => $this->order->getMoney()->amount(),
                         'currency' => $this->order->getMoney()->currency(),
-                        'created_at' => now()->toIso8601String(), // Replace when the datetime should be created
-                        //(new \DateTimeImmutable())->format(\DateTime::ATOM)
+                        'total' => sprintf("%.2f", (float)$this->order->getMoney()->amount()),
+                        'created_at' => now()->setTimezone('UTC')->format('Y-m-d\TH:i:s\Z'),
                     ],
                 ],
             ],
@@ -74,13 +72,13 @@ class OrdersResource
      * @return JsonResponse
      * @throws \Exception
      */
-    public function response(): JsonResponse
+    public function response($code = 200): JsonResponse
     {
         switch ($this->version) {
             case 'v1':
-                return response()->json($this->toArray(), 200, ['Content-Type' => 'application/json']);
+                return response()->json($this->toArray(), $code, ['Content-Type' => 'application/json']);
             case 'v2':
-                return response()->json($this->toArray(), 200, ['Content-Type' => 'application/vnd.api+json']);
+                return response()->json($this->toArray(), $code, ['Content-Type' => 'application/vnd.api+json']);
             default:
                 throw new \Exception('Version not valid');
         }

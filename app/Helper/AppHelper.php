@@ -2,6 +2,7 @@
 
 namespace App\Helper;
 
+use App\Exceptions\LogicValidationException;
 use App\Rules\ValidNIF;
 use Illuminate\Http\JsonResponse;
 
@@ -27,11 +28,11 @@ class AppHelper
                 'data.attributes.customer.name' => 'required|string',
                 'data.attributes.customer.nif' => ['required','string', new ValidNIF()],
                 'data.attributes.summary.currency' => 'required|string|in:EUR', //try with USD
-                'data.attributes.summary.total' => 'required|string',
+                'data.attributes.summary.total' => 'required|string|min:1',
                 'data.attributes.lines' => 'required|array',
                 'data.attributes.lines.*.sku' => 'required|string',
-                'data.attributes.lines.*.qty' => 'required|integer',
-                'data.attributes.lines.*.price' => 'required|string',
+                'data.attributes.lines.*.qty' => 'required|integer|min:1',
+                'data.attributes.lines.*.price' => 'required|numeric',
             ],
             default => throw new \Exception('Invalid version format')
         };
@@ -49,14 +50,16 @@ class AppHelper
 
     private static function respondErrorV2($e, $status = 400): JsonResponse
     {
-        if ($e instanceof \Illuminate\Validation\ValidationException) {
+        if ($e instanceof \Illuminate\Validation\ValidationException
+            || $e instanceof \App\Exceptions\LogicValidationException) {
             // Handle validation exception
             $errors = [];
+            $status = 422;
             foreach ($e->errors() as $field => $messages) {
                 foreach ($messages as $message) {
                     $pointer = '/' . str_replace('.', '/', $field);
                     $errors[] = [
-                        'status' => '422',
+                        'status' => $status,
                         'source' => ['pointer' => $pointer],
                         'title' => 'Invalid Attribute',
                         'detail' => $message
@@ -64,7 +67,7 @@ class AppHelper
                 }
             }
 
-            return response()->json(['errors' => $errors], "422", ['Content-Type' => 'application/vnd.api+json']);
+            return response()->json(['errors' => $errors], $status, ['Content-Type' => 'application/vnd.api+json']);
         } else {
             // TODO work with all sort of errors return and return match get_class($e) or define our own
             $errorResponse = [
@@ -85,10 +88,18 @@ class AppHelper
     private static function respondErrorV1($e, int $status): JsonResponse
     {
         $message = $e->getMessage();
+        $error = "error";
+        if ($e instanceof \Illuminate\Validation\ValidationException
+            || $e instanceof \App\Exceptions\LogicValidationException) {
+            $status = 422;
+            // Handle validation exception
+            $error = "Failed processing body";
+        }
         return response()->json([
-            'status' => 'error',
+            'error' => $error,
             'message' => $message,
         ], $status);
+
     }
 
     public static function validateVersion($version): void

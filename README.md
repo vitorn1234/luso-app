@@ -66,26 +66,48 @@ may it be v1 or v2 with each particular specifications
 ### Version Selection & Serialization
 Since I wasn't sure what was expected, I initially followed a standard approach. Then, I used a controller to process the data, applying different logic based on the version to ensure proper handling.
 ### Feature Testing:
+./vendor/bin/pest to test
 
-- Validating v1 200
+* Validating v1 201
     - Expect value Fields
     - Expected field struct : EUR/ datetime
-- Validating v1 error cases
-- Validating v2
-- Validating v2 error cases
+* Validating v1 error cases 422
+  * Body errors like wrong values
+  * Validating calculations (left validating total calculations inside the object creation)
+  * Validating NIF
+* Validating v2 201
+  * Valid case
+* Validating v2 error cases 422
+  * Body errors like wrong values 
+  * Validating calculations (left validating total calculations inside the object creation)
+  * Validating NIF
+Missing weird cases
 
-Both cases exhibit similar error patterns,
-but the way the response is handled differs.
 
 ### Unit Testing
-
-
+* total calculations - TotalCalculationTest.php
+  * create Order with correct values and total
+  * create Order with one missing item
+* request construction - RequestTest.php
+  * v1 - ask for a v1 response baseed on an Order object
+  * v2 - ask for a v2 response baseed on an Order object
+* response parsing -  ResponseParsingTest.php
+  * v1 response parsing test
+  * v2 response parsing test
 ## Non-Functional Requirements
 FOR psr-12 I installed composer require --dev squizlabs/php_codesniffer for validating
 vendor/bin/phpcs --standard=PSR12 app/Http/Controllers
-"scripts": {
+`"scripts": {
 "lint": "phpcs --standard=PSR12 app/",
 "fix": "phpcbf --standard=PSR12 app/"
-} to composer
+} `
+to composer
 
+### Final ideas
+Could make the transformation better it would make it harder to understand request -> object -> response
 
+There can be some issues testing specially with the float decimal part
+And any other test cases I didn't test
+
+Could have create a function to do the calculations instead of doing it automatically
+like ->calculateTotal or ->validateTotal()... options.... making it easier to test calculation

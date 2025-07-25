@@ -38,9 +38,9 @@ class Money
      * Get the amount
      * @return string
      */
-    public function amount(): float
+    public function amount(): string
     {
-        return (float)$this->amount;
+        return sprintf("%.2f", $this->amount);
     }
 
     /**

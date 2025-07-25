@@ -34,7 +34,7 @@ class Service
         return $this->validatedData;
     }
 
-    public function processOrder(): self
+    public function createOrder(): self
     {
         $items = [];
         try {
@@ -82,7 +82,7 @@ class Service
     public function sendExternalService($url = "Dev.micros.services"): self
     {
         try {
-            $this->processedData = (new OrdersResource($this->version, $this->getOrder()))->toArray();
+            $this->processData();
 
             $response = Http::post($url, $this->processedData);
             // Check if the request was successful (status code 2xx)
@@ -103,5 +103,14 @@ class Service
         }
         $this->version = $version;
         return $this;
+    }
+
+    public function processData(): self {
+        $this->processedData = (new OrdersResource($this->version, $this->getOrder()))->toArray();
+        return $this;
+    }
+
+    public function getProcessData(): array {
+        return $this->processedData;
     }
 }

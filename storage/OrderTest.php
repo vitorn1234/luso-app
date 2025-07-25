@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace storage;
 
 use Tests\TestCase;
 
@@ -34,7 +34,7 @@ class OrderTest extends TestCase
                 ],
                 "summary" => [
                     "currency" => "EUR",
-                    "total" => "199.90"
+                    "total" => "147.00"
                 ],
                 "lines" => [
                     [
@@ -101,7 +101,7 @@ class OrderTest extends TestCase
         // Assert the response JSON structure
         $response->assertJson([
             "error" => "Failed processing body",
-            'message' => 'Total 145.00 defined does not match the sum of the ordered items 115',
+            'message' => 'Total 145 defined does not match the sum of the ordered items 115',
         ]);
         $this->jsonData['total'] = "115.00";
 
@@ -127,13 +127,6 @@ class OrderTest extends TestCase
         ]);
 
     }
-
-//    public function test_order_get_v1(): void
-//    {
-//        // Step 1: Fetch existing order - Assert 200 OK
-//        $response = $this->get('/api/v1/order/e3d4b1d2-97db-4e5d-a7f5-7c9f7b1c2e10');
-//        $response->assertOk(); // Asserts status 200
-//    }
 
     public function test_order_creation_v2(): void
     {
@@ -176,5 +169,55 @@ class OrderTest extends TestCase
 
             return $date->format($format) === $dateString;
         });
+    }
+
+    public function test_order_creation_v2_fail_request_body(): void
+    {
+        $jsonData = [
+            "customer_name" => "João Almeida",
+            "customer_nif" => "12345678Z",
+            "currency" => "EUR"
+        ];
+
+        $response = $this->post('/api/v2/order', $jsonData);
+        $response->assertBadRequest(); // Checks for 201 status
+        // Assert the response JSON structure
+        $response->assertJson([
+            "error" => "Failed processing body",
+            "message" => "The total field is required. (and 1 more error)"
+        ]);
+
+
+        $this->jsonData['total'] = "145.00";
+        $response = $this->post('/api/v1/order', $this->jsonData);
+        $response->assertBadRequest(); // Checks for 400 status
+        // Assert the response JSON structure
+        $response->assertJson([
+            "error" => "Failed processing body",
+            'message' => 'Total 145 defined does not match the sum of the ordered items 115',
+        ]);
+        $this->jsonData['total'] = "115.00";
+
+        // validate currency
+        $this->jsonData['currency'] = "USD";
+        $response = $this->post('/api/v1/order', $this->jsonData);
+        $response->assertBadRequest(); // Checks for 400 status
+        // Assert the response JSON structure
+        $response->assertJson([
+            "error" => "Failed processing body",
+            'message' => 'The selected currency is invalid.',
+        ]);
+        $this->jsonData['currency'] = "EUR";
+
+        // validate items should be last :D
+        $this->jsonData['items'] = [];
+        $response = $this->post('/api/v1/order', $this->jsonData);
+        $response->assertBadRequest(); // Checks for 400 status
+        // Assert the response JSON structure
+        $response->assertJson([
+            "error" => "Failed processing body",
+            'message' => 'The items field is required.',
+        ]);
+
     }
 }

@@ -104,8 +104,8 @@ in case it does not compute/show ./vendor/bin/pest tests/Feature/OrderTestPest.p
   * create Order with one missing item
   * 
 * request construction - RequestTest.php, the feature testing does all the heavy lifting here
-  * v1 - ask for a v1 response baseed on an Order object
-  * v2 - ask for a v2 response baseed on an Order object
+  * v1 - request data -> Order object and compare
+  * v2 - request data -> Order object and compare
 * response parsing -  ResponseParsingTest.php
   * v1 response parsing test
   * v2 response parsing test

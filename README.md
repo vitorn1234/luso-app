@@ -140,3 +140,6 @@ like ->calculateTotal or ->validateTotal()... options.... making it easier to te
 
 There are 3 OrderController the correct one is the one inside Controller root, the other 2 was a test
 without reading the doc :D
+
+### GIT
+https://github.com/vitorn1234/luso-app

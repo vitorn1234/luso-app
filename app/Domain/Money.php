@@ -22,7 +22,8 @@ class Money
         }
 
         // Optionally, validate currency code (ISO 4217)
-        if (empty($currency) ||
+        if (
+            empty($currency) ||
             //!preg_match('/^[A-Z]{3}$/', $currency) ||
             $currency != 'EUR'
         ) { //switch to EUR validation

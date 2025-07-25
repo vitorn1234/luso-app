@@ -22,6 +22,4 @@ class Customer extends Model
         'customer_name',
         'customer_nif',
     ];
-
-
 }

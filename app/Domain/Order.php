@@ -32,7 +32,6 @@ class Order
         $this->validateItems($items);
         $this->items = $items;
         $this->processOrder();
-
     }
 
     protected function processOrder(): void
@@ -40,16 +39,16 @@ class Order
         $this->uuid = (string) Str::uuid();
 
         // Process order number
-        $this->number  = 'ORD-' . date('Y') . '-' . str_pad(random_int(1,99999), 5, '0');
+        $this->number  = 'ORD-' . date('Y') . '-' . str_pad(random_int(1, 99999), 5, '0');
         $this->createdAt = (new \DateTimeImmutable())->format(\DateTime::ATOM);
     }
 
     protected function validateItems($items): void
     {
-        If (count($items) <= 0) {
+        if (count($items) <= 0) {
             throw new \InvalidArgumentException('At least one item must be provided.');
         }
-        $total=0;
+        $total = 0;
         foreach ($items as $item) {
             if (!($item instanceof Item)) {
                 throw new \InvalidArgumentException('All items must be instances of Item');
@@ -58,8 +57,9 @@ class Order
         }
 
         $totalMain = $this->money->amount();
-        if((int)$totalMain != (int)$total){
-            throw new \InvalidArgumentException("Total $totalMain defined does not match the sum of the ordered items $total");
+        if ((int)$totalMain != (int)$total) {
+            throw new \InvalidArgumentException(
+                "Total $totalMain defined does not match the sum of the ordered items $total");
         }
     }
     // Getter for user
@@ -141,7 +141,6 @@ class Order
 
             DB::commit();
             return $this; // Return $this for method chaining
-
         } catch (\Exception $e) {
             DB::rollBack();
             // Important: Log the error for debugging

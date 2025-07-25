@@ -33,7 +33,7 @@ class OrdersResource
                     'status' => 'created', // Consider using $this->order->getStatus() if available
                     'total' => $this->order->getMoney()->amount(),
                     'currency' => $this->order->getMoney()->currency(),
-                    'created_at' => now()->toIso8601String(),  // Replace when we know when the datetime should be created
+                    'created_at' => now()->toIso8601String(),  // Replace when the datetime should be created
                     //$this->order->getCreatedAt()?->toIso8601String()
                 ],
             ],
@@ -49,7 +49,7 @@ class OrdersResource
                         'status' => 'created', // Replace with actual status if available
                         'total' => $this->order->getMoney()->amount(),
                         'currency' => $this->order->getMoney()->currency(),
-                        'created_at' => now()->toIso8601String(),  // Replace when we know when the datetime should be created
+                        'created_at' => now()->toIso8601String(), // Replace when the datetime should be created
                         //(new \DateTimeImmutable())->format(\DateTime::ATOM)
                     ],
                 ],

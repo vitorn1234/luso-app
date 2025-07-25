@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Domain;
+
 class TaxId
 {
     private string $taxId;

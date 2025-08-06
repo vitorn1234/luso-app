@@ -43,23 +43,24 @@ class Service
                 case 'v1':
                     // could switch this into it's own method
                     $taxId = new TaxId($this->validatedData['customer_nif']);
-                    $user = new User($this->validatedData['customer_name'], $taxId);
                     $money = new Money($this->validatedData['total'], $this->validatedData['currency']);
                     foreach ($this->validatedData['items'] as $itemData) {
-                        $items[] = new Item($itemData['sku'], $itemData['qty'], $itemData['unit_price']);
+
+                        $items[] = new Item($itemData['sku'], $itemData['qty'],
+                            (new Money($itemData['unit_price'],$this->validatedData['currency'])));
                     }
-                    $order = new Order($user, $money, $items);
+                    $order = new Order($this->validatedData['customer_name'], $taxId , $money, $items);
                     break;
                 case 'v2':
                     // could switch this into its own method
                     $attr = $this->validatedData['data']['attributes'];
                     $taxId = new TaxId($attr['customer']['nif']);
-                    $user = new User($attr['customer']['name'], $taxId);
                     $money = new Money($attr['summary']['total'], $attr['summary']['currency']);
                     foreach ($attr['lines'] as $itemData) {
-                        $items[] = new Item($itemData['sku'], $itemData['qty'], $itemData['price']);
+                        $items[] = new Item($itemData['sku'], $itemData['qty'],
+                            (new Money($itemData['price'],$attr['summary']['currency'])));
                     }
-                    $order = new Order($user, $money, $items);
+                    $order = new Order($attr['customer']['name'], $taxId, $money, $items);
                     break;
                 default:
                     throw new \Exception('Version not valid');

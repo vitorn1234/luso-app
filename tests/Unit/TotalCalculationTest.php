@@ -28,43 +28,48 @@ $validatedData = [
 ];
 
 $taxId = new TaxId($validatedData['customer_nif']);
-$user = new User($validatedData['customer_name'], $taxId);
+$user = $validatedData['customer_name'];
 $money = new Money($validatedData['total'], $validatedData['currency']);
 $items = array();
 
 foreach ($validatedData['items'] as $itemData) {
-    $items[] = new Item($itemData['sku'], $itemData['qty'], $itemData['unit_price']);
+    $items[] = new Item($itemData['sku'], $itemData['qty'],
+        new Money($itemData['unit_price'], $validatedData['currency']));
 }
 $item = array($items[0]);
 
-it('creates an order successfully with valid value', function ($user, $money, $items) {
+it('creates an order successfully with valid value', function ($user, $taxId, $money, $items) {
 
     $this->expectNotToPerformAssertions(); // Avoid assertion failures on purpose
 
-    $order = new Order($user, $money, $items); // This should not throw an exception
+    $order = new Order($user, $taxId, $money, $items); // This should not throw an exception
     //$this->assertInstanceOf(Order::class, $order); // Verify an Order object is created
 
-})->throwsNoExceptions()->with([
+})
+    ->throwsNoExceptions()->with([
     [
         $user, // your user object
+        $taxId,
         $money, // your money object
         $items // your array of item objects
     ],
 ]);
 
-it('fails to create an order with incorrect total value', function ($user, $money, $item) {
+it('fails to create an order with incorrect total value', function ($user, $taxId, $money, $item) {
 
-   new Order($user, $money, $item);
+   new Order($user, $taxId, $money, $item);
     //testing all possible ways of testing exception for future cases
 //    expect(fn() => new Order($user, $money, $item))
 //        ->toThrow(LogicValidationException::class);
 
-})->throws(LogicValidationException::class,
+})
+->throws(LogicValidationException::class,
     "Total 115.00 defined does not match the sum of the ordered items 15")
     ->with([
     [
         $user, // your user object
+        $taxId,
         $money, // your money object
-        $item // your array of item Object - only one item object in array
+        $item // your array of item objects
     ],
 ]);

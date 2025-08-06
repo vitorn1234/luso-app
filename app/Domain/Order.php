@@ -3,45 +3,48 @@
 namespace App\Domain;
 
 use App\Domain\Item;
+use App\Models\OrderItem;
 use Illuminate\Support\Str;
 use App\Exceptions\LogicValidationException;
 
 class Order
 {
-    private User $user;
+    public string $name;
+    private TaxId $taxId;
     private Money $money;
     /** @var Item[] */
     private array $items;
-    private string $uuid;
-    private string $number;
-    private string $status;
-    // depends on how we gonna use the date if there any format necessary or not
-    private string /*?\DateTimeInterface*/ $createdAt;
+    public string $uuid = "e3d4b1d2-97db-4e5d-a7f5-7c9f7b1c2e10";
+    public string $number = 'ORD-2025-00001';
+    public string $status = "created";
+    // depends on how we're going to use the date if there is any format necessary or not
+    public string /*?\DateTimeInterface*/ $createdAt = "2025-07-22T14:12:09Z";
 
     /**
      * Item constructor.
-     * @param User $user
+     * @param string $name
+     * @param TaxId $taxId
      * @param Money $qty
      * @param Item[] $items
      */
-    public function __construct(User $user, Money $money, array $items)
+    public function __construct(string $name,TaxId $taxId, Money $money, array $items)
     {
-        $this->user = $user;
+        $this->name = $name;
         $this->money = $money;
-
+        $this->taxId = $taxId;
         $this->validateItems($items);
         $this->items = $items;
-        $this->processOrder();
+//        $this->processOrder();
     }
 
-    protected function processOrder(): void
-    {
-        $this->uuid = (string) Str::uuid();
-
-        // Process order number
-        $this->number  = 'ORD-' . date('Y') . '-' . str_pad(random_int(1, 99999), 5, '0');
-        $this->createdAt = now()->setTimezone('UTC')->format('Y-m-d\TH:i:s\Z');
-    }
+//    protected function processOrder(): void
+//    {
+//        $this->uuid = (string) Str::uuid();
+//
+//        // Process order number
+//        $this->number  = 'ORD-' . date('Y') . '-' . str_pad(random_int(1, 99999), 5, '0');
+//        $this->createdAt = now()->setTimezone('UTC')->format('Y-m-d\TH:i:s\Z');
+//    }
 
     protected function validateItems($items): void
     {
@@ -56,7 +59,7 @@ class Order
                 $message = 'All items must be instances of Item';
                 throw new LogicValidationException($message,['data.attributes.lines' => [$message]]);
             }
-            $total += (int)$item->getQty() * (int)$item->getPrice();
+            $total += (int)$item->qty * (int)$item->getMoney()->amount();
         }
 
         $totalMain = $this->money->amount();
@@ -64,11 +67,6 @@ class Order
             $message = "Total $totalMain defined does not match the sum of the ordered items $total";
             throw new LogicValidationException( $message,['data.attributes.summary.total'=>[$message]]);
         }
-    }
-    // Getter for user
-    public function getUser(): User
-    {
-        return $this->user;
     }
 
     // Getter for quantity
@@ -82,33 +80,22 @@ class Order
     {
         return $this->items;
     }
-
-    // Getter for order UUID
-    public function getUuid(): string
+    public function setUuid(string $uuid): void
     {
-        return $this->uuid;
+        $this->uuid = $uuid;
     }
 
-    // Getter for order number
-    public function getNumber(): string
+    public function getTaxId(): TaxId
     {
-        return $this->number;
+        return $this->taxId;
     }
 
-    public function getStatus(): string
+    // Setter for order number
+    public function setStatus(string $number): void
     {
-        return $this->status;
+        $this->number = $number;
     }
 
-    public function getCreatedAt(): string
-    {
-        return $this->createdAt;
-    }
-
-    public function getArray(): array
-    {
-        return get_object_vars($this);
-    }
     /**
      * Create a new Order with items and save it to DB
      */
@@ -119,8 +106,8 @@ class Order
             DB::beginTransaction();
             // Create order
             $order = new \App\Models\Order();
-            $order->customer_name = $this->user->getName();
-            $order->customer_nif = $this->user->getTaxId();
+            $order->customer_name = $this->name;
+            $order->customer_nif = $this->getTaxId()->taxId;
             $order->total = $this->getMoney()->amount();
             $order->currency = $this->getMoney()->currency();
             $order->number = $this->number;
@@ -131,15 +118,10 @@ class Order
             foreach ($this->items as $item) {
                 $orderItem = new OrderItem();
                 $orderItem->order_id = $order->id;
-                $orderItem->sku = $item->getSku();
-                $orderItem->qty = $item->getQty();
-                $orderItem->unit_price = $item->getPrice();
+                $orderItem->sku = $item->sku;
+                $orderItem->qty = $item->qty;
+                $orderItem->unit_price = $item->getMoney()->amount();
                 $orderItem->save();
-//            $order->items()->create([
-//                'item_id' => $item->getSku(),
-//                'quantity' => $item->getQty(),
-//                'item_price' => $item->getPrice(),
-//            ]);
             }
 
             DB::commit();
@@ -151,4 +133,10 @@ class Order
             throw $e; // Re-throw the exception to handle it elsewhere
         }
     }
+
+    public function jsonSerialize() : array
+    {
+        return get_object_vars($this);
+    }
+
 }

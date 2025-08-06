@@ -28,22 +28,22 @@ $validatedData = [
 ];
 
 $taxId = new TaxId($validatedData['customer_nif']);
-$user = new User($validatedData['customer_name'], $taxId);
 $money = new Money($validatedData['total'], $validatedData['currency']);
 $items = array();
 foreach ($validatedData['items'] as $itemData) {
-    $items[] = new Item($itemData['sku'], $itemData['qty'], $itemData['unit_price']);
+    $items[] = new Item($itemData['sku'], $itemData['qty'],
+        new Money($itemData['unit_price'], $validatedData['currency']));
 }
-$order = new Order($user, $money, $items);
+$order = new Order($validatedData['customer_name'], $taxId, $money, $items);
 
 $responseArrayV1 = [
     'data' => [
-        'uuid' => $order->getUuid(),
-        'number' => $order->getNumber(),
+        'uuid' => $order->uuid,
+        'number' => $order->number,
         'status' => 'created',
         'total' => $order->getMoney()->amount(),
         'currency' => 'EUR',
-        'created_at' => $order->getCreatedAt(),
+        'created_at' => $order->createdAt,
     ]
 ];
 it('v1 response parsing test', function ($order, $responseArrayV1) {
@@ -59,17 +59,17 @@ it('v1 response parsing test', function ($order, $responseArrayV1) {
 
 $responseArrayV2 = [
     "links" => [
-        "self" => "https://micros.services/api/v2/order/".$order->getNumber()
+        "self" => "https://micros.services/api/v2/order/".$order->number
     ],
     "data" => [
         "type" => "orders",
-        "id" => $order->getNumber(),
+        "id" => $order->number,
         "attributes" => [
-            "uuid" => $order->getUuid(),
+            "uuid" => $order->uuid,
             "status" => "created",
             "currency" => $order->getMoney()->currency(),
             "total" => $order->getMoney()->amount(),
-            "created_at" => $order->getCreatedAt(),
+            "created_at" => $order->createdAt,
         ]
     ]
 ];

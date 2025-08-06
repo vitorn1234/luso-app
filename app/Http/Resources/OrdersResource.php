@@ -28,27 +28,29 @@ class OrdersResource
         return match ($this->version) {
             'v1' => [
                 'data' => [
-                    'uuid' => $this->order->getUuid(),
-                    'number' => $this->order->getNumber(),
+                    'uuid' => $this->order->uuid,
+                    'number' => $this->order->number,
                     'status' => 'created', // Consider using $this->order->getStatus() if available
                     'total' => sprintf("%.2f", $this->order->getMoney()->amount()),
                     'currency' => $this->order->getMoney()->currency(),
-                    'created_at' => now()->setTimezone('UTC')->format('Y-m-d\TH:i:s\Z'),
+                    'created_at' => $this->order->createdAt,
+                        //now()->setTimezone('UTC')->format('Y-m-d\TH:i:s\Z'),
                 ],
             ],
             'v2' => [
                 'links' => [
-                    'self' => "https://micros.services/api/v2/order/{$this->order->getNumber()}",
+                    'self' => "https://micros.services/api/v2/order/{$this->order->number}",
                 ],
                 'data' => [
                     'type' => 'orders',
-                    'id' => $this->order->getNumber(),
+                    'id' => $this->order->number,
                     'attributes' => [
-                        'uuid' => $this->order->getUuid(),
+                        'uuid' => $this->order->uuid,
                         'status' => 'created', // Replace with actual status if available
                         'currency' => $this->order->getMoney()->currency(),
                         'total' => sprintf("%.2f", (float)$this->order->getMoney()->amount()),
-                        'created_at' => now()->setTimezone('UTC')->format('Y-m-d\TH:i:s\Z'),
+                        'created_at' => $this->order->createdAt,
+                        //now()->setTimezone('UTC')->format('Y-m-d\TH:i:s\Z'),
                     ],
                 ],
             ],

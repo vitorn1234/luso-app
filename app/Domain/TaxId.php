@@ -4,7 +4,7 @@ namespace App\Domain;
 
 class TaxId
 {
-    private string $taxId;
+    public string $taxId;
 
     /**
      * Constructor validates and sets the tax ID.
@@ -13,41 +13,42 @@ class TaxId
      */
     public function __construct(string $taxId)
     {
-        $normalizedTaxId = strtoupper(trim($taxId));
-        if (!$this->validateNIF($normalizedTaxId)) {
+        if (!$this->validateNIF($taxId)) {
             throw new \InvalidArgumentException('Invalid Tax ID (NIF).');
         }
-        $this->taxId = $normalizedTaxId;
-    }
-
-    /**
-     * Get the tax ID
-     * @return string
-     */
-    public function getTaxId(): string
-    {
-        return $this->taxId;
+        $this->taxId = $taxId;
     }
 
     /**
      * Validate the NIF (tax ID)
-     * @param string $value
+     * @param string $nif
      * @return bool
      */
-    private function validateNIF(string $value): bool
+    private function validateNIF(string $nif): bool
     {
-        // Check format: 8 digits + 1 letter
-        if (!preg_match('/^[0-9]{8}[A-Z]$/', $value)) {
+        // Check format: 9 digits
+        if (!preg_match('/^[0-9]{9}$/', $nif)) {
             return false;
         }
 
-        $numbers = substr($value, 0, 8);
-        $letter = substr($value, -1);
-        $letters = 'TRWAGMYFPDXBNJZSQVHLCKE';
+        // Convert string to array of digits
+        $digits = str_split($nif);
 
-        // Calculate checksum
-        $index = intval($numbers) % 23;
-        return $letter === $letters[$index];
+        // Extract the check digit (last digit)
+        $checkDigit = (int) $digits[8];
+
+        // Calculate the weighted sum of the first 8 digits
+        $sum = 0;
+        for ($i = 0; $i < 8; $i++) {
+            $sum += (int) $digits[$i] * (9 - $i);
+        }
+
+        // Compute the expected check digit
+        $rest = $sum % 11;
+        $expectedCheckDigit = (11 - $rest) % 10;
+
+        // Check if the calculated check digit matches the actual one
+        return $checkDigit === $expectedCheckDigit;
     }
 
     /**
@@ -57,14 +58,5 @@ class TaxId
     public function __toString(): string
     {
         return $this->taxId;
-    }
-
-    /**
-     * Check if the current tax ID is valid (redundant if constructor validates)
-     * @return bool
-     */
-    public function isValid(): bool
-    {
-        return $this->validateNIF($this->taxId);
     }
 }

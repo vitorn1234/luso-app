@@ -4,6 +4,7 @@ use App\Domain\Item;
 use App\Domain\Money;
 use App\Domain\Order;
 use App\Domain\TaxId;
+use App\DTO\OrderBuildFactory;
 use App\DTO\OrderRequestFactory;
 use App\DTO\OrderRequestV1;
 use App\DTO\OrderResponseFactory;
@@ -87,6 +88,9 @@ beforeEach(function () {
         ]
     ];
 });
+afterEach(function () {
+    Mockery::close();
+});
 
 it('successfully processes an order V1', function () {
     // Arrange
@@ -106,70 +110,12 @@ it('successfully processes an order V1', function () {
                 return $mock;
             }));
     });
-    // Mock OrderClient
-//    $mockClient = Mockery::mock(V1OrderClient::class);
-////    $mockClient->shouldReceive('createOrder')->once()->andReturn($responseV1);
-//
-//    // Mock static factory method for OrderClientFactory
-//    Mockery::mock(OrderClientFactory::class)
-//        ->shouldReceive('make')
-//        ->once()
-//        ->with($version)
-//        ->andReturn($mockClient);
-//    $money = new Money($dto->total, $dto->currency);
-//    $taxId = new TaxId($dto->customer_nif);
-//    $items = array_map(fn($item) => new Item(
-//        $item['sku'],
-//        $item['qty'],
-//        new Money($item['unit_price'], $dto->currency)
-//    ), $dto->items);
-//
-//    $order=  new Order($dto->customer_name, $taxId, $money, $items);
 
-    // Correct: Mock the returned client
-//    $mockClient = Mockery::mock(V1OrderClient::class); // Assuming OrderClient is the actual class
-//    $mockClient->shouldReceive('createOrder')->once()->andReturn($responseV1);
-//    $mockClientFactory = Mockery::mock(OrderClientFactory::class);
-//    $mockClientFactory->shouldReceive('make')->with('v1')->andReturn($mockClient);
-//    $client = $mockClientFactory->make('v1');
-    ///$result = $client->createOrder($order);
-
-    // Mock OrderRequestFactory // return Order object
-//    $mockOrderRequest = OrderRequestV1::fromArray($requestV1);
-//    Mockery::mock(OrderRequestFactory::class)
-//        ->shouldReceive('make')
-//        ->once()
-//        ->with($version, $requestV1)
-//        ->andReturn($mockOrderRequest);
-
-    // Mock OrderResponseFactory
-//    Mockery::mock(OrderResponseFactory::class)
-//        ->shouldReceive('make')
-//        ->once()
-//        ->with($version, $responseV1)
-//        ->andReturn(OrderResponseV1::fromArray($responseV1));
-
-//    Mockery::mock(OrderController2::class)->shouldAllowMockingProtectedMethods()
-//        ->shouldReceive('buildOrderFromV1')
-//        ->once()
-//        ->with($mockOrderRequest)
-//        ->andReturn($mockOrderResponse);
     // Instantiate controller
     $controller = new OrderController2();
 
     // Mock the buildOrderFromV1 method
     $controller = Mockery::spy($controller);
-//    $controller->shouldAllowMockingProtectedMethods()
-//        ->shouldReceive('buildOrderFromV1')
-//        ->once()
-//        ->with($mockOrderRequest)
-//        ->andReturn();
-
-//    Mockery::mock('alias:OrderClientFactory')
-//        ->shouldReceive('createOrder')
-//        ->once()
-//        ->with()
-//        ->andReturn();
     // Act
     $response = $controller->orderIntegration($requestV1, $version);
 
@@ -197,4 +143,48 @@ it('handles exception and returns error response', function () {
     expect($response->getStatusCode())->toEqual(400);
     expect($response->content())->toEqual('{"error":"error","message":"Invalid or missing `customer_name` in data"}');
     // Additional assertions about the error message if needed
+});
+
+it('creates an order and returns json response', function () {
+    $version = 'v1';
+
+    // Mock OrderRequestFactory
+    $dtoRequest = OrderRequestV1::fromArray($this->requestV1);
+    Mockery::mock('alias:' . OrderRequestFactory::class)
+        ->shouldReceive('make')
+        ->with($version, $this->requestV1)
+        ->andReturn($dtoRequest)->andThrow(new Exception('request error processing'));
+//
+//    // Mock OrderBuildFactory
+//    //$order = OrderBuildFactory::make($version, $dtoRequest);
+//    Mockery::mock('alias:' .OrderBuildFactory::class)
+//        ->shouldReceive('make')
+//        ->with($version, $dtoRequest)
+//        ->andReturn($order = "");
+//
+//    // Mock OrderClientFactory
+//    $clientMock = Mockery::mock();
+//    Mockery::mock(OrderClientFactory::class)
+//        ->shouldReceive('make')
+//        ->with($version)
+//        ->andReturn($clientMock);
+//
+//    // Mock client createOrder call
+//    $clientMock->shouldReceive('createOrder')
+//        ->with($order)
+//        ->andReturn($this->responseV1);
+//
+//    // Mock OrderResponseFactory
+//    $dtoResponse = OrderResponseFactory::make($version, $this->responseV1);
+//    Mockery::mock(OrderResponseFactory::class)
+//        ->shouldReceive('make')
+//        ->with($version, $this->responseV1)
+//        ->andReturn($dtoResponse);
+
+    // Now call the controller method
+    $controller = new OrderController2();
+    $result = $controller->orderIntegration($this->requestV1, $version);
+
+    expect($result->getStatusCode())->toBe(400);
+    expect($result->getData()->message)->toBe('request error processing');
 });

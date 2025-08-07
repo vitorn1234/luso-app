@@ -64,9 +64,14 @@ class OrderController2 extends Controller
             ]
         ]
     ];
-    public function orderIntegration(/*Request $request*/ array $data = [], string $version = 'v2'): \Illuminate\Http\JsonResponse
+    public function orderIntegration(/*Request $request*/ array $data = [], string $version = ''): \Illuminate\Http\JsonResponse
     {
-        $data = $this->data2;
+        // enable sometesting using postman
+        if (empty($data)) {
+            $data = $this->data2;
+            $version = 'v2';
+        }
+
         try {
             // create client for selected version
             $client = OrderClientFactory::make($version);

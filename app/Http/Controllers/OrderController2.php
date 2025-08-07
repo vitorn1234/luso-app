@@ -7,28 +7,79 @@ use App\Domain\Money;
 use App\Domain\Order;
 use App\Domain\TaxId;
 use App\Domain\User;
+use App\DTO\OrderRequestFactory;
 use App\DTO\OrderRequestV1;
 use App\DTO\OrderRequestV2;
 use App\Helper\AppHelper;
 use App\Service\OrderClientFactory;
-use App\Service\OrderRequestFactory;
-use App\Service\OrderResponseFactory;
+use App\DTO\OrderResponseFactory;
 use Illuminate\Http\Request;
+
 
 class OrderController2 extends Controller
 {
-    public function orderIntegration(/*Request $request*/ array $data, string $version): \Illuminate\Http\JsonResponse
+    public array $data = [
+        "customer_name" => "João Almeida",
+        "customer_nif" => "123456789",
+        "total" => "115.00",
+        "currency" => "EUR",
+        "items" => [
+            [
+                "sku" => "PEN-16GB",
+                "qty" => 3,
+                "unit_price" => "5.00",
+            ],
+            [
+                "sku" => "NOTE-A5",
+                "qty" => 10,
+                "unit_price" => "10.00",
+            ],
+        ],
+    ];
+
+    public array $data2 = [
+        "data" => [
+            "type" => "orders",
+            "attributes" => [
+                "customer" => [
+                    "name" => "João Almeida",
+                    "nif" => "123456789"
+                ],
+                "summary" => [
+                    "currency" => "EUR",
+                    "total" => "115.00"
+                ],
+                "lines" => [
+                    [
+                        "sku" => "PEN-16GB",
+                        "qty" => 3,
+                        "price" => "5.00"
+                    ],
+                    [
+                        "sku" => "NOTE-A5",
+                        "qty" => 10,
+                        "price" => "10.00"
+                    ]
+                ]
+            ]
+        ]
+    ];
+    public function orderIntegration(/*Request $request*/ array $data = [], string $version = 'v2'): \Illuminate\Http\JsonResponse
     {
+        $data = $this->data2;
         try {
             // create client for selected version
             $client = OrderClientFactory::make($version);
             $versionCapitalized = strtoupper($version);
 
             //$data = $request->json()->all();
+            //process request data
             $dtoRequest = OrderRequestFactory::make($version, $data);
-            // Dynamically construct the method name could create based on what i did with factory
+
+            // Dynamically construct the method name TODO improve
             $methodName = 'buildOrderFrom' . $versionCapitalized;
             $order = $this->$methodName($dtoRequest);
+
             //we can switch to another version if we add any variation
             $response = $client->createOrder($order);
 

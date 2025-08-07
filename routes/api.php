@@ -34,3 +34,4 @@ Route::group(['middleware' => DetectApiVersion::class], function () {
 Route::get('v1/order', [OrderController::class, 'create']);
 });
 
+Route::get('testing/order', [\App\Http\Controllers\OrderController2::class, 'orderIntegration']);

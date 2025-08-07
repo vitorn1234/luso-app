@@ -3,7 +3,7 @@
 beforeEach(function () {
     $this->jsonData = [
         "customer_name" => "João Almeida",
-        "customer_nif" => "12345678Z",
+        "customer_nif" => "123456789",
         "total" => "115.00",
         "currency" => "EUR",
         "items" => [
@@ -26,7 +26,7 @@ beforeEach(function () {
             "attributes" => [
                 "customer" => [
                     "name" => "João Almeida",
-                    "nif" => "12345678Z"
+                    "nif" => "123456789"
                 ],
                 "summary" => [
                     "currency" => "EUR",

@@ -2,13 +2,13 @@
 
 namespace App\Service;
 
-use App\Services\OrderClientInterface;
-use App\Services\V1OrderClient;
-use App\Services\V2OrderClient;
+use App\Service\OrderClientInterface;
+use App\Service\V1OrderClient;
+use App\Service\V2OrderClient;
 
 class OrderClientFactory
 {
-    public static function make(string $version): OrderClientInterface
+    public static function make(string $version)
     {
         return match ($version) {
             'v1' => new V1OrderClient(),

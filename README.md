@@ -153,14 +153,16 @@ https://github.com/vitorn1234/luso-app
 3. Midgame create Order object and use that to create the request data
 4. Make request to api v1 or v2
 5. Process Response using a factory like
-6. Make validations (ignore, process only uiid or id based on version)
+6. Make validations (ignore, process only uiid or id based on version?)
+7. Update Order object with the values from response(API does not respond with proper struct)
 
+created a new controller OrderController2 with that logic
 
-Principles Applied
+### Principles Applied???
 
 SOLID: Single Responsibility (DTOs, services), Dependency Inversion (factory pattern).
 DRY: Centralized serialization/deserialization.
-PSR-12: Consistent code style. (autoamtic)
-Clean Architecture: Domain, Application, Infrastructure layers separated.
+PSR-12: Consistent code style. (automatic, phpstorm + command I used before)
+~~Clean Architecture: Domain, Application, Infrastructure layers separated.~~ (maybe nor properly organized)
 
 

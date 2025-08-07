@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\DTO;
 
 use App\DTO\OrderRequest;
 use App\DTO\OrderRequestV1;

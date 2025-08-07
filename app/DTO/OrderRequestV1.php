@@ -34,12 +34,12 @@ class OrderRequestV1 extends OrderRequest
     {
         // Validate customer_name
         if (!isset($data['customer_name']) || empty(trim($data['customer_name']))) {
-            throw new \InvalidArgumentException('Invalid or missing "customer_name" in data');
+            throw new \InvalidArgumentException("Invalid or missing `customer_name` in data");
         }
 
         // Validate customer_nif
         if (!isset($data['customer_nif']) || empty(trim($data['customer_nif']))) {
-            throw new \InvalidArgumentException('Invalid or missing "customer_nif" in data');
+            throw new \InvalidArgumentException("Invalid or missing `customer_nif` in data");
         }
 
         // Validate customer details
@@ -51,12 +51,12 @@ class OrderRequestV1 extends OrderRequest
 
         // Validate total
         if (!isset($data['total']) || empty(trim($data['total']))) {
-            throw new \InvalidArgumentException('Invalid or missing "total" in data');
+            throw new \InvalidArgumentException("Invalid or missing `total` in data");
         }
 
         // Validate currency
         if (!isset($data['currency']) || empty(trim($data['currency']))) {
-            throw new \InvalidArgumentException('Invalid or missing "currency" in data');
+            throw new \InvalidArgumentException("Invalid or missing `currency` in data");
         }
 
         // Validate summary
@@ -68,7 +68,7 @@ class OrderRequestV1 extends OrderRequest
 
         // Validate items
         if (!isset($data['items']) || !is_array($data['items']) || empty($data['items'])) {
-            throw new \InvalidArgumentException('Missing, invalid, or empty "items" in data');
+            throw new \InvalidArgumentException('Missing, invalid, or empty `items` in data');
         }
 
         // Validate lines/items

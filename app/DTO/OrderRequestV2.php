@@ -18,7 +18,7 @@ class OrderRequestV2 extends OrderRequest
     {
         // Validate top-level structure
         if (!isset($data['data'])) {
-            throw new \InvalidArgumentException('Missing "data" key in payload.');
+            throw new \InvalidArgumentException('Missing `data` key in payload.');
         }
 
         $instance = new self();
@@ -36,13 +36,13 @@ class OrderRequestV2 extends OrderRequest
     {
         // Validate 'type'
         if (!isset($data['type']) || $data['type'] !== 'orders') {
-            throw new \InvalidArgumentException('Invalid or missing "type". Must be "orders".');
+            throw new \InvalidArgumentException('Invalid or missing `type`. Must be "orders".');
         }
         $this->type = $data['type'];
 
         // Validate 'attributes'
         if (!isset($data['attributes']) || !is_array($data['attributes'])) {
-            throw new \InvalidArgumentException('"attributes" is missing or not an array.');
+            throw new \InvalidArgumentException('`attributes` is missing or not an array.');
         }
         $this->attributes = $data['attributes'];
 
@@ -58,33 +58,33 @@ class OrderRequestV2 extends OrderRequest
     {
         // Customer validation
         if (!isset($attributes['customer']) || !is_array($attributes['customer'])) {
-            throw new \InvalidArgumentException('Missing or invalid "customer" in attributes.');
+            throw new \InvalidArgumentException('Missing or invalid `customer` in attributes.');
         }
 
         if (!isset($attributes['customer']['name']) || !isset($attributes['customer']['nif'])) {
-            throw new \InvalidArgumentException('Missing or invalid "customer parameters" in attributes.');
+            throw new \InvalidArgumentException('Missing or invalid `customer parameters` in attributes.');
         }
 
         $this->validateCustomer($attributes['customer']['name'], $attributes['customer']['nif']);
 
         // Summary validation
         if (!isset($attributes['summary']) || !is_array($attributes['summary'])) {
-            throw new \InvalidArgumentException('Missing or invalid "summary" in attributes.');
+            throw new \InvalidArgumentException('Missing or invalid `summary` in attributes.');
         }
 
         if (!isset($attributes['summary']['currency'])) {
-            throw new \InvalidArgumentException('Missing or invalid "currency" in attributes.');
+            throw new \InvalidArgumentException('Missing or invalid `currency` in attributes.');
         }
 
         if (!isset($attributes['summary']['total'])) {
-            throw new \InvalidArgumentException('Missing or invalid "total" in attributes.');
+            throw new \InvalidArgumentException('Missing or invalid `total` in attributes.');
         }
 
         $this->validateSummary($attributes['summary']['currency'], $attributes['summary']['total']);
 
         // Lines validation
         if (!isset($attributes['lines']) || !is_array($attributes['lines']) || empty($attributes['lines'])) {
-            throw new \InvalidArgumentException('Missing, invalid, or empty "lines" in attributes.');
+            throw new \InvalidArgumentException('Missing, invalid, or empty `lines` in attributes.');
         }
         $this->validateLines($attributes['lines']);
     }

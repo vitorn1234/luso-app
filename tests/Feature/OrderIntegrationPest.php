@@ -40,7 +40,7 @@ beforeEach(function () {
         ]
     ];
 
-    $this->requestV1= [
+    $this->requestV1 = [
         "customer_name" => "João Almeida",
         "customer_nif" => "123456789",
         "total" => "115.00",
@@ -95,7 +95,7 @@ it('successfully processes an order V1', function () {
     $version = 'v1';
 
 
-    Mockery::mock(OrderClientFactory::class, function ($mock) use ($responseV1){
+    Mockery::mock(OrderClientFactory::class, function ($mock) use ($responseV1) {
         $mock->shouldReceive('make')
             ->with('v1') // Or whatever version you are testing
             ->andReturn(Mockery::mock(OrderClientInterface::class, function ($mock) use ($responseV1) {
@@ -178,33 +178,23 @@ it('successfully processes an order V1', function () {
     $responseData = $response->getData();
 
     expect($responseData)->toMatchObject([
-        "name"=> "João Almeida",
+        "name" => "João Almeida",
         //"uuid"=> "26bdadc4-b2ee-4e83-b5f3-1b7da8d59a93",
-        "number"=> "ORD-1234-12345",
-        "status"=> "created",
-        "createdAt"=> "2025-07-22T14:12:09Z",
+        "number" => "ORD-1234-12345",
+        "status" => "created",
+        "createdAt" => "2025-07-22T14:12:09Z",
     ]);
 });
 
-//it('handles exception and returns error response', function () {
-//    // Arrange
-//    $data = [];
-//    $version = 'v1';
-//
-//    // Mock static factory to throw exception
-//    Mockery::mock('alias:OrderClientFactory')
-//        ->shouldReceive('make')
-//        ->once()
-//        ->with($version)
-//        ->andThrow(new \Exception('Error'));
-//
-//    $controller = new OrderController();
-//
-//    // Act
-//    $response = $controller->orderIntegration($data, $version);
-//
-//    // Assert
-//    expect($response)->toBeInstanceOf(JsonResponse::class);
-//    expect($response->getStatusCode())->toEqual(500);
-//    // Additional assertions about the error message if needed
-//});
+it('handles exception and returns error response', function () {
+    $version = 'v1';
+
+    $controller = new OrderController2();
+    $response = $controller->orderIntegration([], $version);
+
+    // Assert
+    expect($response)->toBeInstanceOf(JsonResponse::class);
+    expect($response->getStatusCode())->toEqual(400);
+    expect($response->content())->toEqual('{"error":"error","message":"Invalid or missing `customer_name` in data"}');
+    // Additional assertions about the error message if needed
+});

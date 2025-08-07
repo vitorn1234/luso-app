@@ -1,7 +1,7 @@
 <?php
 
 // app/Service/V1OrderService.php
-namespace App\Service;
+namespace App\Services;
 
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
@@ -15,7 +15,7 @@ class V1OrderClient implements OrderClientInterface
         try {
             // option since serve not valid certificate
             $response = Http::withOptions([
-                'verify' => false,
+                'verify' => false,'throw' => true
             ])->post('https://Dev.micros.services/api/v1/order', [
                 'customer_name' => $order->name,
                 'customer_nif' => $order->getTaxId()->taxId,
@@ -29,7 +29,6 @@ class V1OrderClient implements OrderClientInterface
             ]);
 
             return $response->json();
-
         } catch (\Illuminate\Http\Client\RequestException $e) {
             Log::error('Order V2 POST request failed: ' . $e->getMessage());
             // maybe throw exception

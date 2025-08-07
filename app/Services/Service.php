@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Services;
 
 use App\Domain\Money;
 use App\Domain\Order;
@@ -45,11 +45,13 @@ class Service
                     $taxId = new TaxId($this->validatedData['customer_nif']);
                     $money = new Money($this->validatedData['total'], $this->validatedData['currency']);
                     foreach ($this->validatedData['items'] as $itemData) {
-
-                        $items[] = new Item($itemData['sku'], $itemData['qty'],
-                            (new Money($itemData['unit_price'],$this->validatedData['currency'])));
+                        $items[] = new Item(
+                            $itemData['sku'],
+                            $itemData['qty'],
+                            (new Money($itemData['unit_price'], $this->validatedData['currency']))
+                        );
                     }
-                    $order = new Order($this->validatedData['customer_name'], $taxId , $money, $items);
+                    $order = new Order($this->validatedData['customer_name'], $taxId, $money, $items);
                     break;
                 case 'v2':
                     // could switch this into its own method
@@ -57,8 +59,11 @@ class Service
                     $taxId = new TaxId($attr['customer']['nif']);
                     $money = new Money($attr['summary']['total'], $attr['summary']['currency']);
                     foreach ($attr['lines'] as $itemData) {
-                        $items[] = new Item($itemData['sku'], $itemData['qty'],
-                            (new Money($itemData['price'],$attr['summary']['currency'])));
+                        $items[] = new Item(
+                            $itemData['sku'],
+                            $itemData['qty'],
+                            (new Money($itemData['price'], $attr['summary']['currency']))
+                        );
                     }
                     $order = new Order($attr['customer']['name'], $taxId, $money, $items);
                     break;
@@ -106,13 +111,14 @@ class Service
         return $this;
     }
 
-    public function processData(): self {
+    public function processData(): self
+    {
         $this->processedData = (new OrdersResource($this->version, $this->getOrder()))->toArray();
         return $this;
     }
 
-    public function getProcessData(): array {
+    public function getProcessData(): array
+    {
         return $this->processedData;
     }
-
 }

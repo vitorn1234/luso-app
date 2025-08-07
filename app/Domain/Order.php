@@ -2,9 +2,8 @@
 
 namespace App\Domain;
 
-use App\Domain\Item;
 use App\Models\OrderItem;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use App\Exceptions\LogicValidationException;
 
 class Order
@@ -27,7 +26,7 @@ class Order
      * @param Money $qty
      * @param Item[] $items
      */
-    public function __construct(string $name,TaxId $taxId, Money $money, array $items)
+    public function __construct(string $name, TaxId $taxId, Money $money, array $items)
     {
         $this->name = $name;
         $this->money = $money;
@@ -51,13 +50,13 @@ class Order
 //                0 => "The data.type field is required."
         if (count($items) <= 0) {
             $message = 'At least one item must be provided.';
-            throw new LogicValidationException($message,["data.attributes.lines"=>[$message]]);
+            throw new LogicValidationException($message, ["data.attributes.lines" => [$message]]);
         }
         $total = 0;
         foreach ($items as $item) {
             if (!($item instanceof Item)) {
                 $message = 'All items must be instances of Item';
-                throw new LogicValidationException($message,['data.attributes.lines' => [$message]]);
+                throw new LogicValidationException($message, ['data.attributes.lines' => [$message]]);
             }
             $total += (int)$item->qty * (int)$item->getMoney()->amount();
         }
@@ -65,7 +64,7 @@ class Order
         $totalMain = $this->money->amount();
         if ((int)$totalMain != (int)$total) {
             $message = "Total $totalMain defined does not match the sum of the ordered items $total";
-            throw new LogicValidationException( $message,['data.attributes.summary.total'=>[$message]]);
+            throw new LogicValidationException($message, ['data.attributes.summary.total' => [$message]]);
         }
     }
 
@@ -134,9 +133,8 @@ class Order
         }
     }
 
-    public function jsonSerialize() : array
+    public function jsonSerialize(): array
     {
         return get_object_vars($this);
     }
-
 }

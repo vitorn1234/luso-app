@@ -155,8 +155,10 @@ https://github.com/vitorn1234/luso-app
 5. Process Response using a factory like
 6. Make validations (ignore, process only uiid or id based on version?)
 7. Update Order object with the values from response(API does not respond with proper struct)
+8. return base root values in response
 
 created a new controller OrderController2 with that logic
+added a method to facilitate testing using that transform a post request data and a version
 
 ### Principles Applied???
 

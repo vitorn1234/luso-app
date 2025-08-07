@@ -84,7 +84,7 @@ class OrderResponseV2 extends OrderResponse
         $this->status = $attributes['status'];
 
         // TODO ASK why i need to do this
-        if (!empty($attributes['summary']['currency'])){
+        if (!empty($attributes['summary']['currency'])) {
             $attributes['currency'] = $attributes['summary']['currency'];
         }
 
@@ -95,7 +95,7 @@ class OrderResponseV2 extends OrderResponse
         $this->currency = $attributes['currency'];
 
         // TODO ASK why i need to do this
-        if (!empty($attributes['summary']['total'])){
+        if (!empty($attributes['summary']['total'])) {
             $attributes['total'] = $attributes['summary']['total'];
         }
         // Validate 'total'

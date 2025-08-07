@@ -1,7 +1,7 @@
 <?php
 
 // app/Service/V2OrderService.php
-namespace App\Service;
+namespace App\Services;
 
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
@@ -15,7 +15,7 @@ class V2OrderClient implements OrderClientInterface
         try {
             // option since serve not valid certificate
             $response = Http::withOptions([
-                'verify' => false,
+                'verify' => false,'throw' => true
             ])->withHeaders([
                 'Content-Type' => 'application/vnd.api+json',
                 'Accept' => 'application/vnd.api+json',
@@ -37,15 +37,10 @@ class V2OrderClient implements OrderClientInterface
                             'price' => $item->getMoney()->amount(),
                         ], $order->getItems()),
                     ],
-                ],
-                'headers' => [
-                    'Accept' => 'application/json',
-                    'Content-Type' => 'application/json',
                 ]
             ]);
 
             return $response->json();
-
         } catch (\Illuminate\Http\Client\RequestException $e) {
             Log::error('Order V2 POST request failed: ' . $e->getMessage());
             // maybe throw exception
@@ -54,6 +49,9 @@ class V2OrderClient implements OrderClientInterface
         } catch (ConnectionException $e) {
 //            return response()->json(['error' => 'Failed to place order', 'details' => $e->getMessage()], 500);
             throw new \Exception('Order V2 POST request connection failed: ' . $e->getMessage());
+        } catch (\Exception $e) {
+//            return response()->json(['error' => 'Failed to place order', 'details' => $e->getMessage()], 500);
+            throw new \Exception('Order V2 POST request failed: ' . $e->getMessage());
         }
         // if exception is abnormal will send the normal exception
     }

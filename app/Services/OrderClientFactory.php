@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Service;
+namespace App\Services;
 
-use App\Service\OrderClientInterface;
-use App\Service\V1OrderClient;
-use App\Service\V2OrderClient;
+use App\Services\OrderClientInterface;
+use App\Services\V1OrderClient;
+use App\Services\V2OrderClient;
 
 class OrderClientFactory
 {
